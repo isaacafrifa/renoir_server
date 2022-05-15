@@ -1,3 +1,9 @@
+### Secure Connect Bundle ###
+/src/main/resources/secure-connect-renoir.zip
+
+### Environment varibles ###
+environment.properties
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
