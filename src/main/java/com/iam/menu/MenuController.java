@@ -13,11 +13,15 @@ import java.util.UUID;
 @Slf4j
 public record MenuController(MenuService menuService, MenuMapper menuMapper) {
 
-    // get all menus
+    // get all menus using pagination and sorting
     @GetMapping("/menus")
-    public ResponseEntity<Object> getMenus() {
+    public ResponseEntity<Object> getAllMenus(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "id") String sort
+    ) {
         log.info("Get Mapping for all menu items invoked");
-        return ResponseEntity.ok(menuService.getAllMenu());
+        return ResponseEntity.ok(menuService.getAllMenuByPaginationAndSorting(page,size,sort));
     }
 
     // get menu by id
