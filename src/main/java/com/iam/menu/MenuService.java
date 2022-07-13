@@ -4,6 +4,10 @@ package com.iam.menu;
 import com.iam.exception.ResourceAlreadyExists;
 import com.iam.exception.ResourceNotFound;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,6 +28,13 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         return Menus.builder()
                 .menus(allMenus)
                 .build();
+    }
+
+    public Page<MenuDto> getAllMenuByPaginationAndSorting(int pageNo, int pageSize, String sortBy){
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<MenuDto> pagedResult = menuRepository.findAll(paging)
+                .map(menuMapper::convertToDto);
+        return pagedResult;
     }
 
     public MenuDto getMenuById(UUID id) {
