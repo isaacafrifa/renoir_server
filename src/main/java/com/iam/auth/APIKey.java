@@ -1,10 +1,12 @@
 package com.iam.auth;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class APIKey {
-    private UUID key;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Integer id;
+    private String key;
     private String user;
     private boolean isEnabled;
     private LocalDateTime createdAt;

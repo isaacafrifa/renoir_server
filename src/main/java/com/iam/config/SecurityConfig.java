@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.server.ResponseStatusException;
 
 @Configuration
 @EnableWebSecurity
@@ -25,10 +27,10 @@ import org.springframework.security.core.AuthenticationException;
 @Order(1)
 @Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Value("${yourapp.http.auth-token-header-name}")
+    @Value("${auth-token-header-name}")
     private String principalRequestHeader;
 
-    @Value("${yourapp.http.auth-token}")
+    @Value("${auth-token}")
     private String principalRequestValue;
 
     @Bean
@@ -46,7 +48,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 if (!principalRequestValue.equals(principal)) {
                     log.error("API Key[{}] was not found or not the expected value", principal);
                     throw new BadCredentialsException("Bad credentials");
+//                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"you can't consume this service , Please validate your apikeys");
+
+//                    HttpServletResponse httpResponse = (HttpServletResponse) response;
+//                    httpResponse.setStatus(401);
+//                    httpResponse.getWriter().write("Invalid API Key");
                 }
+//                ApiKeyAuthenticationToken apiToken = new ApiKeyAuthenticationToken(apiKey, AuthorityUtils.NO_AUTHORITIES);
+//                SecurityContextHolder.getContext().setAuthentication(apiToken);
                 authentication.setAuthenticated(true);
                 return authentication;
             }
@@ -60,5 +69,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilter(filter)
                 .authorizeRequests()
                 .anyRequest().authenticated();
+
     }
 }
