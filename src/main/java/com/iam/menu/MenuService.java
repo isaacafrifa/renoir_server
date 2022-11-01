@@ -48,7 +48,8 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         log.info("create Menu item");
         Menu menu = menuMapper.convertToEntity(menuDto);
         //check if menu already exists
-        if (doesMenuAlreadyExists(menu.getName())) {
+        if (menuRepository.existsByName(menu.getName())) {
+            log.info("menu item [{}] already exists", menu.getName());
             throw new ResourceAlreadyExists("Menu item already exists");
         }
         return menuMapper.convertToDto(menuRepository.save(menu));
@@ -73,9 +74,5 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         return menuMapper.convertToDto(menu);
     }
 
-    public boolean doesMenuAlreadyExists(String menuName) {
-        log.info("check if menu item [{}] already exists", menuName);
-        return menuRepository.findByName(menuName).isPresent();
-    }
 
 }
