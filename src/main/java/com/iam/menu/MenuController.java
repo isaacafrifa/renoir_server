@@ -28,30 +28,34 @@ public record MenuController(MenuService menuService, MenuMapper menuMapper) {
     @GetMapping("/menus/{id}")
     public ResponseEntity<Object> getMenuById(@PathVariable("id") UUID id) {
         log.info("Get Mapping for menu item with id {} invoked", id);
-        return ResponseEntity.ok(menuService.getMenuById(id));
+        var foundMenu = menuService.getMenuById(id);
+        return ResponseEntity.ok(menuMapper.convertToDto(foundMenu));
     }
 
     // create post mapping for menu
     @PostMapping("/menus")
     public ResponseEntity<Object> createMenu(@RequestBody @Valid MenuDto menuDTO) {
         log.info("Post Mapping for Menu() invoked using {}", menuDTO);
-        return new ResponseEntity<>(menuService.createMenu(menuDTO), HttpStatus.CREATED);
+        var menuToBeSaved = menuMapper.convertToEntity(menuDTO);
+        var savedMenu = menuService.createMenu(menuToBeSaved);
+        return new ResponseEntity<>(menuMapper.convertToDto(savedMenu), HttpStatus.CREATED);
     }
 
     // update menu by id
     @PutMapping("/menus/{id}")
     public ResponseEntity<Object> updateMenu(@PathVariable("id") UUID id, @RequestBody @Valid MenuDto menuDTO) {
         log.info("Put Mapping for Menu() invoked using {}", menuDTO);
-        MenuDto menuDto = menuService.updateMenu(id, menuDTO);
-        return ResponseEntity.ok(menuDto);
+        var menuFromDto = menuMapper.convertToEntity(menuDTO);
+        Menu updatedMenu = menuService.updateMenu(id, menuFromDto);
+        return ResponseEntity.ok(menuMapper.convertToDto(updatedMenu));
     }
 
     // delete menu by id
     @DeleteMapping("/menus/{id}")
     public ResponseEntity<Object> deleteMenu(@PathVariable("id") UUID id) {
         log.info("Delete Mapping for Menu() invoked using {}", id);
-        MenuDto menuDto = menuService.deleteMenu(id);
-        return ResponseEntity.ok(menuDto);
+        Menu deleteMenu = menuService.deleteMenu(id);
+        return ResponseEntity.ok(menuMapper.convertToDto(deleteMenu));
     }
 
 }

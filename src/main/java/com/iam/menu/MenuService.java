@@ -18,16 +18,14 @@ import java.util.UUID;
 @Slf4j
 public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) {
 
-    public Menus getAllMenu() {
+    public List<Menu> getAllMenu() {
         log.info("get all Menu items");
-        List<MenuDto> allMenus = new ArrayList<>();
+        List<Menu> allMenus = new ArrayList<>();
         menuRepository.findAll().forEach(menu -> {
-                    allMenus.add(menuMapper.convertToDto(menu));
+                    allMenus.add(menu);
                 }
         );
-        return Menus.builder()
-                .menus(allMenus)
-                .build();
+        return allMenus;
     }
 
     public Page<MenuDto> getAllMenuByPaginationAndSorting(int pageNo, int pageSize, String sortBy){
@@ -37,41 +35,39 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         return pagedResult;
     }
 
-    public MenuDto getMenuById(UUID id) {
+    public Menu getMenuById(UUID id) {
         log.info("get Menu item by id");
-        var menu = menuRepository.findById(id)
+        return menuRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Menu item not found"));
-        return menuMapper.convertToDto(menu);
     }
 
-    public MenuDto createMenu(MenuDto menuDto) {
+    public Menu createMenu(Menu menu) {
         log.info("create Menu item");
-        Menu menu = menuMapper.convertToEntity(menuDto);
         //check if menu already exists
         if (menuRepository.existsByName(menu.getName())) {
             log.info("menu item [{}] already exists", menu.getName());
             throw new ResourceAlreadyExists("Menu item already exists");
         }
-        return menuMapper.convertToDto(menuRepository.save(menu));
+        return menuRepository.save(menu);
     }
 
-    public MenuDto updateMenu(UUID id, MenuDto menuDto) {
+    public Menu updateMenu(UUID id, Menu menu) {
         log.info("update Menu item");
         Menu existingMenu = menuRepository.findById(id).orElseThrow(() -> new ResourceNotFound("Menu item not found"));
-        existingMenu.setName(menuDto.getName());
-        existingMenu.setDescription(menuDto.getDescription());
-        existingMenu.setPrice(menuDto.getPrice());
-        existingMenu.setCategory(menuDto.getCategory());
-        existingMenu.setComment(menuDto.getComment());
+        existingMenu.setName(menu.getName());
+        existingMenu.setDescription(menu.getDescription());
+        existingMenu.setPrice(menu.getPrice());
+        existingMenu.setCategory(menu.getCategory());
+        existingMenu.setComment(menu.getComment());
         var updatedMenu = menuRepository.save(existingMenu);
-        return menuMapper.convertToDto(menuRepository.save(updatedMenu));
+        return updatedMenu;
     }
 
-    public MenuDto deleteMenu(UUID id) {
+    public Menu deleteMenu(UUID id) {
         log.info("delete Menu item");
         Menu menu = menuRepository.findById(id).orElseThrow(() -> new ResourceNotFound("Menu item not found"));
         menuRepository.deleteById(menu.getId());
-        return menuMapper.convertToDto(menu);
+        return menu;
     }
 
 
