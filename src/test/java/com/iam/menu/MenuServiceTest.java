@@ -3,20 +3,20 @@ package com.iam.menu;
 import com.iam.exception.ResourceAlreadyExists;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +39,8 @@ class MenuServiceTest {
     private MenuService underTest;
     private Menu menu;
     private String uuidString;
+    @Captor
+    ArgumentCaptor<Menu> menuArgumentCaptor;
 
     @BeforeEach
     void setUp() {
@@ -46,34 +48,43 @@ class MenuServiceTest {
         menu = new Menu(UUID.fromString(uuidString), "Rice", "Brown rice",
                 BigDecimal.TEN, Category.SIDES,
                 "Available during lunch and dinner only");
-
     }
 
     @Test
     void itShouldGetAllMenu() {
+        //given
+        List<Menu> allMenus = Arrays.asList(menu);
+        given(menuRepository.findAll()).willReturn(allMenus);
         //when
         underTest.getAllMenu();
         //then
         verify(menuRepository).findAll();
     }
 
-    @Disabled
     @Test
-    void getAllMenuByPaginationAndSorting() {
+    void itShouldGetAllMenuByPaginationAndSorting() {
         //given
-        var pageNo= 1;
-        var pageSize=5;
-        var sortBy="id";
-        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-        given(menuRepository.findAll(paging)).willReturn(any());
-
+        MenuDto menuDto = MenuDto.builder().id(menu.getId()).name(menu.getName())
+                .price(menu.getPrice()).comment(menu.getComment())
+                .category(menu.getCategory()).description(menu.getDescription())
+                .build();
+        Page<Menu> menuPage = new PageImpl<>(Arrays.asList(menu));
+        Pageable paging = PageRequest.of(1, 5, Sort.by("id"));
+        ArgumentCaptor<Pageable> pageableCaptor =
+                ArgumentCaptor.forClass(Pageable.class);
+        given(menuRepository.findAll(paging)).willReturn(menuPage);
+        given(menuMapper.convertToDto(menu)).willReturn(menuDto);
+        //when
         underTest.getAllMenuByPaginationAndSorting(1, 5, "id");
         //then
-        verify(menuRepository).findAll();
+        verify(menuRepository, times(1)).findAll(paging);
+        verify(menuRepository).findAll(pageableCaptor.capture());
+        var captorValue = pageableCaptor.getValue();
+        assertEquals(5, captorValue.getPageSize());
     }
 
     @Test
-    void getMenuById() {
+    void itShouldGetMenuById() {
         //given
         given(menuRepository.findById(any())).willReturn(Optional.of(menu));
         //when
@@ -87,9 +98,7 @@ class MenuServiceTest {
     void itShouldCreateMenu() {
         // when
         underTest.createMenu(menu);
-
         // then
-        ArgumentCaptor<Menu> menuArgumentCaptor = ArgumentCaptor.forClass(Menu.class);
         verify(menuRepository).save(menuArgumentCaptor.capture());
         var capturedMenu = menuArgumentCaptor.getValue();
         assertEquals(capturedMenu, menu);
@@ -99,7 +108,6 @@ class MenuServiceTest {
     void itShouldThrowResourceAlreadyExists() {
         // given
         given(menuRepository.existsByName(anyString())).willReturn(true); // force menu name to already exist in system
-
         // when + then
 //          assertThrows(ResourceAlreadyExists.class, () -> {
 //          underTest.createMenu(menu);
