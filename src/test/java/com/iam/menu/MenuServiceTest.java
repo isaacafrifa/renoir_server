@@ -1,7 +1,6 @@
 package com.iam.menu;
 
 import com.iam.exception.ResourceAlreadyExists;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 class MenuServiceTest {
     @Mock
     private MenuRepository menuRepository;
