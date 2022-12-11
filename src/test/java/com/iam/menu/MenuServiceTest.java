@@ -101,7 +101,6 @@ class MenuServiceTest {
           assertThrows(ResourceNotFound.class, () -> {
           underTest.getMenuById(UUID.randomUUID());
           }, "Should throw ResourceNotFound exception");
-
     }
 
     @DisplayName("Unit test for createMenu method")
