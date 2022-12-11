@@ -1,6 +1,7 @@
 package com.iam.menu;
 
 import com.iam.exception.ResourceAlreadyExists;
+import com.iam.exception.ResourceNotFound;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -89,6 +91,17 @@ class MenuServiceTest {
         underTest.getMenuById(UUID.randomUUID());
         // then
         verify(menuRepository).findById(any());
+    }
+
+    @Test
+    void itShouldThrowResourceNotFound() {
+        // given
+        given(menuRepository.findById(any())).willThrow(ResourceNotFound.class);
+        // when + then
+          assertThrows(ResourceNotFound.class, () -> {
+          underTest.getMenuById(UUID.randomUUID());
+          }, "Should throw ResourceNotFound exception");
+
     }
 
     @DisplayName("Unit test for createMenu method")
