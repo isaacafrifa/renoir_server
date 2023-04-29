@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -51,7 +52,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
       MethodArgumentNotValidException: is thrown when argument annotated
       with @Valid failed validation returns HttpStatus.BAD_REQUEST as status
      */
-    @Override
+    @Nullable
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
         List<String> errors = new ArrayList<>();
@@ -68,13 +69,13 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     /*
      * Handle HttpMessageNotReadableException. Happens when request JSON is malformed.
      */
-    @Override
+    @Nullable
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error = "Malformed JSON request";
         APIError apiError = new APIError(HttpStatus.BAD_REQUEST.value(),
                 error,
                 request.getDescription(false) + "", LocalDateTime.now());
-        return new ResponseEntity<Object>(apiError, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 }

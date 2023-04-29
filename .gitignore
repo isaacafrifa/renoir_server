@@ -5,6 +5,7 @@
 environment.properties
 
 HELP.md
+.dcignore
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

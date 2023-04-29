@@ -21,18 +21,14 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
     public List<Menu> getAllMenu() {
         log.info("get all Menu items");
         List<Menu> allMenus = new ArrayList<>();
-        menuRepository.findAll().forEach(menu -> {
-                    allMenus.add(menu);
-                }
-        );
+        allMenus.addAll(menuRepository.findAll());
         return allMenus;
     }
 
     public Page<MenuDto> getAllMenuByPaginationAndSorting(int pageNo, int pageSize, String sortBy){
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-        Page<MenuDto> pagedResult = menuRepository.findAll(paging)
+        return menuRepository.findAll(paging)
                 .map(menuMapper::convertToDto);
-        return pagedResult;
     }
 
     public Menu getMenuById(UUID id) {
@@ -59,8 +55,7 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         existingMenu.setPrice(menu.getPrice());
         existingMenu.setCategory(menu.getCategory());
         existingMenu.setComment(menu.getComment());
-        var updatedMenu = menuRepository.save(existingMenu);
-        return updatedMenu;
+        return menuRepository.save(existingMenu);
     }
 
     public Menu deleteMenu(UUID id) {
@@ -69,6 +64,5 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         menuRepository.deleteById(menu.getId());
         return menu;
     }
-
 
 }
