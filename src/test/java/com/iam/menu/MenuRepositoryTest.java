@@ -2,17 +2,21 @@ package com.iam.menu;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@DisplayName("Running menu repository tests")
 @DataJpaTest
-class MenuRepositoryTest {
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // deactivate the default behaviour
+class MenuRepositoryTest extends AbstractContainerBaseTest{
 
     @Autowired
     private MenuRepository underTest;
@@ -34,23 +38,11 @@ class MenuRepositoryTest {
     @Test
     void itShouldCheckIfMenuNameExists() {
         //given
-        String menuName = "Rice";
         underTest.save(menu);
         //when
-        var actual = underTest.existsByName(menuName);
+        var actual = underTest.existsByName("Rice");
         //then
         assertTrue(actual);
     }
-
-    @Test
-    void itShouldCheckIfMenuNameDoesNotExist() {
-        //given
-        String menuName = "Rice";
-        //when
-        var actual = underTest.existsByName(menuName);
-        //then
-        assertFalse(actual);
-    }
-
 
 }

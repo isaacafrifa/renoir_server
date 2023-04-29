@@ -13,11 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MenuMapperTest {
     private MenuMapper underTest;
     private Menu menu;
-    private String uuidString;
 
     @BeforeEach
     void setUp() {
-        uuidString = "7f000001-8495-1ea0-8184-95ff336e0000";
+        String uuidString = "7f000001-8495-1ea0-8184-95ff336e0000";
         menu = new Menu(UUID.fromString(uuidString), "Rice", "Brown rice",
                 BigDecimal.TEN, Category.SIDES,
                 "Available during lunch and dinner only");

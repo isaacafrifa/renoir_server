@@ -3,6 +3,7 @@ package com.iam.menu;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iam.exception.ResourceNotFound;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.HttpClientErrorException;
@@ -20,11 +20,12 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = MenuController.class)
 @AutoConfigureMockMvc(addFilters = false) //bypass filters including security
+@DisplayName("Running Menu Controller test")
 class MenuControllerTest {
 
     @Autowired
@@ -42,13 +43,20 @@ class MenuControllerTest {
         return "/api/v1/menus";
     }
 
-    public String convertToJsonString(Object obj) {
+    private String convertToJsonString(Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    private RequestBuilder buildGetRequest(String content) {
+        return MockMvcRequestBuilders
+                .get(getRootUrl() + "/{id}", content)
+                .accept(MediaType.APPLICATION_JSON);
+    }
+
 
     @BeforeEach
     void setUp() {
@@ -72,17 +80,15 @@ class MenuControllerTest {
         given(menuService.getMenuById(any())).willReturn(menu);
         given(menuMapper.convertToDto(menu)).willReturn(responseMenuDto);
 
-        RequestBuilder request = MockMvcRequestBuilders
-                .get(getRootUrl() + "/{id}", uuidString)
-                .accept(MediaType.APPLICATION_JSON);
+        RequestBuilder request = buildGetRequest(uuidString);
 
-        MvcResult result = mockMvc.perform(request)
+        mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(content()
-                        .json("{\"id\":\"7f000001-8495-1ea0-8184-95ff336e0000\",\"name\":\"test\"," +
-                                        "\"description\":\"test description\",\"price\":10}"
-                                , false))
-//                .andDo(print())
+                        .json("""
+                                {"id":"7f000001-8495-1ea0-8184-95ff336e0000","name":"test","description":"test description","price":10}
+                                """
+                        ))
                 .andReturn();
     }
 
@@ -90,9 +96,7 @@ class MenuControllerTest {
     void itShouldGetNotFound_MenuById_DoesNotExist() throws Exception {
         given(menuService.getMenuById(any())).willThrow(new ResourceNotFound("Menu not found"));
 
-        RequestBuilder request = MockMvcRequestBuilders
-                .get(getRootUrl() + "/{id}", uuidString)
-                .accept(MediaType.APPLICATION_JSON);
+        RequestBuilder request = buildGetRequest(uuidString);
 
         mockMvc.perform(request)
                 .andExpect(status().isNotFound())
@@ -103,13 +107,13 @@ class MenuControllerTest {
     void itShouldGetBadRequest_MenuById_isNotOfTypeUuid() throws Exception {
         given(menuService.getMenuById(any())).willThrow(HttpClientErrorException.BadRequest.class);
 
-        RequestBuilder request = MockMvcRequestBuilders
-                .get(getRootUrl() + "/{id}", "notUUID")
-                .accept(MediaType.APPLICATION_JSON);
+        RequestBuilder request = buildGetRequest("notUUID");
 
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(content().json("{\"message\":\"ID is not of the preferred type\"}"))
+                .andExpect(content().json(
+                        "{\"message\":\"ID is not of the preferred type\"}"
+                ))
                 .andReturn();
     }
 
@@ -120,15 +124,13 @@ class MenuControllerTest {
                 .price(menu.getPrice()).comment(menu.getComment())
                 .category(menu.getCategory()).description(menu.getDescription())
                 .build();
-        given(menuMapper.convertToEntity(requestMenuDto)).willReturn(menu);
-//        given(menuService.createMenu(any())).willReturn(menu);
-        given(menuMapper.convertToDto(menu)).willReturn(responseMenuDto);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .post(getRootUrl())
                 .accept(MediaType.APPLICATION_JSON)
                 .content(convertToJsonString(requestMenuDto))
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+
         mockMvc.perform(request)
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -141,8 +143,6 @@ class MenuControllerTest {
                 .category(menu.getCategory()).description(menu.getDescription())
                 .build();
 
-        given(menuMapper.convertToEntity(requestMenuDto)).willReturn(menu);
-//     given(menuService.updateMenu(any(),any(Menu.class))).willReturn(menu);
         given(menuMapper.convertToDto(any())).willReturn(responseMenuDto);
 
         RequestBuilder request = MockMvcRequestBuilders
@@ -152,16 +152,16 @@ class MenuControllerTest {
                 .contentType(MediaType.APPLICATION_JSON);
         mockMvc.perform(request)
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\":\"7f000001-8495-1ea0-8184-95ff336e0000\",\"name\":\"test\",\"description\":\"test description\"}"))
-                .andDo(print())
+                .andExpect(content()
+                        .json("""
+                                        {"id":"7f000001-8495-1ea0-8184-95ff336e0000","name":"test","description":"test description"}
+                                """, false))
                 .andReturn();
     }
 
 
     @Test
     void deleteMenu() throws Exception {
-//given(menuService.deleteMenu(any())).willReturn(menu);
-        given(menuMapper.convertToDto(menu)).willReturn(responseMenuDto);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .delete(getRootUrl() + "/{id}", uuidString)
@@ -169,7 +169,6 @@ class MenuControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
-
     }
 
 }
