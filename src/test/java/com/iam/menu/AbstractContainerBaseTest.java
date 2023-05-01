@@ -11,7 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public abstract class AbstractContainerBaseTest {
 
     @Container
-    public static PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer("postgres:13")
+    public static PostgreSQLContainer postgresqlContainer = new PostgreSQLContainer("postgres:latest")
 //                .withInitScript("config/INIT.sql")
                 .withDatabaseName("menu_db");
 
