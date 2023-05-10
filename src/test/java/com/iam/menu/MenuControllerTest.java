@@ -1,6 +1,7 @@
 package com.iam.menu;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iam.exception.ResourceAlreadyExists;
 import com.iam.exception.ResourceNotFound;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
@@ -119,7 +121,6 @@ class MenuControllerTest {
 
     @Test
     void createMenu() throws Exception {
-
         requestMenuDto = MenuDto.builder().name(menu.getName())
                 .price(menu.getPrice()).comment(menu.getComment())
                 .category(menu.getCategory()).description(menu.getDescription())
@@ -133,6 +134,27 @@ class MenuControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isCreated())
+                .andReturn();
+    }
+
+    @Test
+    void itShouldThrowMenuAlreadyExists() throws Exception {
+        given(menuService.createMenu(any())).willThrow(new ResourceAlreadyExists("Menu item already exists"));
+
+        requestMenuDto = MenuDto.builder().name(menu.getName())
+                .price(menu.getPrice()).comment(menu.getComment())
+                .category(menu.getCategory()).description(menu.getDescription())
+                .build();
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post(getRootUrl())
+                .accept(MediaType.APPLICATION_JSON)
+                .content(convertToJsonString(requestMenuDto))
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+
+        mockMvc.perform(request)
+                .andExpect(status().isConflict())
+                .andDo(MockMvcResultHandlers.print())
                 .andReturn();
     }
 
