@@ -1,4 +1,4 @@
-# re_server
+# renoir_server
 This is the backend for renoir
 
 ### Content
