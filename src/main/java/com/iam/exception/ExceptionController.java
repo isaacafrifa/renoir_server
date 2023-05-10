@@ -21,14 +21,14 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFound.class)
     public ResponseEntity<APIError> handleClientNotFoundException(ResourceNotFound ex, WebRequest request) {
-        APIError errorDetails = new APIError(HttpStatus.NOT_FOUND.value(), ex.getMessage(),
+        APIError errorDetails = new APIError(ex.getMessage(),
                 request.getDescription(false) + "", LocalDateTime.now());
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ResourceAlreadyExists.class)
     public ResponseEntity<APIError> handleClientAlreadyExistsException(ResourceAlreadyExists ex, WebRequest request) {
-        APIError errorDetails = new APIError(HttpStatus.CONFLICT.value(), ex.getMessage(),
+        APIError errorDetails = new APIError(ex.getMessage(),
                 request.getDescription(false) + "", LocalDateTime.now());
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
@@ -41,7 +41,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
                                                                    WebRequest request) {
         String error = "%s is not of the preferred type".formatted(ex.getName().toUpperCase());
-        APIError apiError = new APIError(HttpStatus.BAD_REQUEST.value(), error,
+        APIError apiError = new APIError(error,
                 request.getDescription(false) + "", LocalDateTime.now());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
@@ -60,7 +60,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         }
         //remove array's [] from errors
         var errorString = errors.toString().replace("[", "").replace("]", "");
-        APIError apiError = new APIError(status.value(), errorString,
+        APIError apiError = new APIError(errorString,
                 request.getDescription(false) + "", LocalDateTime.now());
         return handleExceptionInternal(ex, apiError, headers, status, request);
     }
@@ -72,9 +72,16 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
                                                                   HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error = "Malformed JSON request";
-        APIError apiError = new APIError(HttpStatus.BAD_REQUEST.value(),
+        APIError apiError = new APIError(
                 error,
                 request.getDescription(false) + "", LocalDateTime.now());
-        return new ResponseEntity<Object>(apiError, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
+        APIError apiError = new APIError(
+                ex.getLocalizedMessage(), request.getDescription(false), LocalDateTime.now());
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
