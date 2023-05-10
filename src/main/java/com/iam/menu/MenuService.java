@@ -25,7 +25,7 @@ public record MenuService(MenuRepository menuRepository, MenuMapper menuMapper) 
         return allMenus;
     }
 
-    public Page<MenuDto> getAllMenuByPaginationAndSorting(int pageNo, int pageSize, String sortBy){
+     public Page<MenuDto> getAllMenuByPaginationAndSorting(int pageNo, int pageSize, String sortBy){
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         return menuRepository.findAll(paging)
                 .map(menuMapper::convertToDto);
