@@ -2,11 +2,13 @@ package com.iam.menu;
 
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class MenuMapper {
 
     public MenuDto convertToDto(Menu menu) {
-        return MenuDto.builder()
+              return MenuDto.builder()
                 .id(menu.getId())
                 .name(menu.getName())
                 .description(menu.getDescription())
@@ -14,6 +16,13 @@ public class MenuMapper {
                 .category(menu.getCategory())
                 .comment(menu.getComment())
                 .build();
+    }
+
+    public Menus convertToDtoList(List<Menu> menuList) {
+        var menuDtos = menuList.stream()
+                .map(this::convertToDto)
+                .toList();
+        return Menus.builder().menus(menuDtos).build();
     }
 
     public Menu convertToEntity(MenuDto menuDto) {
