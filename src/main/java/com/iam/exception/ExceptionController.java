@@ -76,5 +76,13 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
                 error,
                 request.getDescription(false) + "", LocalDateTime.now());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+
+    }
+
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
+        APIError apiError = new APIError(
+                ex.getLocalizedMessage(), request.getDescription(false), LocalDateTime.now());
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
