@@ -9,4 +9,5 @@ public record APIError (
         String path,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime timeStamp){
+
 }
