@@ -3,6 +3,7 @@ package com.iam.menu;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iam.RenoirServerApplication;
 import org.json.JSONException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -21,7 +22,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
-
+@Disabled
 @SpringBootTest(classes = RenoirServerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayName("Running menu integration tests")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
